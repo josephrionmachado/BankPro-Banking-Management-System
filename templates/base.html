@@ -1,0 +1,190 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}BankPro | Banking Management{% endblock %}</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <!-- Main CSS - Cache Refresh -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=20261120">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+
+        <div class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-landmark"></i>
+            </div>
+
+            <div class="logo-text">
+                <span>BankPro</span>
+                <small>Banking Management</small>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="sidebar-menu">
+
+            <p class="menu-label">OVERVIEW</p>
+
+            <a href="{% url 'dashboard' %}" class="nav-link">
+                <i class="fas fa-chart-pie"></i>
+                <span>Dashboard</span>
+            </a>
+
+            <p class="menu-label">MANAGEMENT</p>
+
+            <a href="{% url 'customer_list' %}" class="nav-link">
+                <i class="fas fa-users"></i>
+                <span>Customers</span>
+            </a>
+
+            <a href="{% url 'account_list' %}" class="nav-link">
+                <i class="fas fa-wallet"></i>
+                <span>Accounts</span>
+            </a>
+
+            <a href="{% url 'transaction_list' %}" class="nav-link">
+                <i class="fas fa-arrow-right-arrow-left"></i>
+                <span>Transactions</span>
+            </a>
+
+            <a href="{% url 'reports' %}" class="nav-link">
+                <i class="fas fa-chart-line"></i>
+                <span>Reports</span>
+            </a>
+
+            <p class="menu-label">SYSTEM</p>
+
+            <a href="/admin/" class="nav-link">
+                <i class="fas fa-user-shield"></i>
+                <span>Admin Panel</span>
+            </a>
+
+        </div>
+
+        <!-- Sidebar Bottom -->
+        <div class="sidebar-bottom">
+
+            <div class="sidebar-support">
+                <i class="fas fa-headset"></i>
+
+                <div>
+                    <strong>Need Help?</strong>
+                    <small>BankPro Management</small>
+                </div>
+            </div>
+
+            <!-- Secure Logout -->
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+
+                <button type="submit"
+                        class="nav-link logout-link"
+                        style="width: 100%; border: none; background: transparent; text-align: left; cursor: pointer; font-family: inherit;">
+
+                    <i class="fas fa-right-from-bracket"></i>
+                    <span>Logout</span>
+
+                </button>
+            </form>
+
+            <div class="sidebar-footer">
+                <span>BankPro © 2026</span>
+                <span>Academic Project</span>
+            </div>
+
+        </div>
+
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <header class="topbar">
+
+            <div class="topbar-left">
+
+                <button class="menu-toggle"
+                        id="menuToggle"
+                        aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+
+                <div class="breadcrumb">
+                    <span>BankPro</span>
+                    <i class="fas fa-chevron-right"></i>
+
+                    <strong>
+                        {% block breadcrumb %}Dashboard{% endblock %}
+                    </strong>
+                </div>
+
+            </div>
+
+            <div class="topbar-right">
+
+                <div class="topbar-date">
+                    <i class="far fa-calendar"></i>
+                    <span id="currentDate"></span>
+                </div>
+
+                <div class="profile-section">
+
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+
+                    <div class="profile-details">
+                        <strong>{{ request.user.username }}</strong>
+                        <small>System Admin</small>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </header>
+
+        <!-- Page Content -->
+        <section class="page-content">
+
+            {% block content %}
+            {% endblock %}
+
+        </section>
+
+        <footer class="main-footer">
+            <p>© 2026 BankPro. Banking Management System.</p>
+        </footer>
+
+    </main>
+
+</div>
+
+<!-- JavaScript -->
+<script src="{% static 'js/script.js' %}"></script>
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

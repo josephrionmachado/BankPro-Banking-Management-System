@@ -1,0 +1,273 @@
+
+{% extends 'base.html' %}
+
+{% block title %}New Transaction | BankPro{% endblock %}
+{% block breadcrumb %}New Transaction{% endblock %}
+
+{% block extra_css %}
+<style>
+    .transaction-form-container {
+        max-width: 850px;
+        margin: 0 auto;
+    }
+
+    .form-heading {
+        margin-bottom: 25px;
+    }
+
+    .form-heading h1 {
+        font-size: 25px;
+        color: #1e293b;
+        margin-bottom: 8px;
+    }
+
+    .form-heading p {
+        color: #64748b;
+        font-size: 14px;
+    }
+
+    .transaction-form-card {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 14px;
+        box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
+        border: 1px solid #e8edf3;
+    }
+
+    .form-group {
+        margin-bottom: 22px;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 9px;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 600;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #dce3ec;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #334155;
+        background: #ffffff;
+        outline: none;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .field-error {
+        color: #dc2626;
+        font-size: 12px;
+        margin-top: 6px;
+    }
+
+    .balance-note {
+        background: #eff6ff;
+        color: #1d4ed8;
+        padding: 13px 15px;
+        border-radius: 8px;
+        font-size: 13px;
+        margin-bottom: 22px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        margin-top: 28px;
+    }
+
+    .btn-cancel,
+    .btn-submit {
+        padding: 12px 22px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        cursor: pointer;
+        border: none;
+    }
+
+    .btn-cancel {
+        background: #f1f5f9;
+        color: #475569;
+    }
+
+    .btn-submit {
+        background: #2563eb;
+        color: #ffffff;
+    }
+
+    .btn-submit:hover {
+        background: #1d4ed8;
+    }
+
+    .form-alert {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+        padding: 13px 15px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+        .transaction-form-card {
+            padding: 20px;
+        }
+
+        .form-actions {
+            flex-direction: column;
+        }
+
+        .btn-cancel,
+        .btn-submit {
+            text-align: center;
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="transaction-form-container">
+
+    <div class="form-heading">
+        <h1>Create New Transaction</h1>
+        <p>Deposit or withdraw money from a customer's account.</p>
+    </div>
+
+    <div class="transaction-form-card">
+
+        <div class="balance-note">
+            <i class="fas fa-info-circle"></i>
+            Select an account and transaction type. The account balance will be updated automatically after a successful transaction.
+        </div>
+
+        {% if errors %}
+            <div class="form-alert">
+                <strong>Please correct the following errors:</strong>
+                <ul>
+                    {% for field, error in errors.items %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="account">Select Account</label>
+
+                <select name="account" id="account" required>
+                    <option value="">Choose an account</option>
+
+                    {% for account in accounts %}
+                        <option
+                            value="{{ account.pk }}"
+                            {% if form_data.account == account.pk|stringformat:"s" %}selected{% endif %}
+                        >
+                            {{ account.account_number }} -
+                            {{ account.customer.first_name }}
+                            {{ account.customer.last_name }}
+                            (Balance: ₹{{ account.balance|floatformat:2 }})
+                        </option>
+                    {% endfor %}
+                </select>
+
+                {% if errors.account %}
+                    <p class="field-error">{{ errors.account }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="transaction_type">Transaction Type</label>
+
+                <select name="transaction_type" id="transaction_type" required>
+                    <option value="DEPOSIT"
+                        {% if form_data.transaction_type == 'DEPOSIT' %}selected{% endif %}>
+                        Deposit
+                    </option>
+
+                    <option value="WITHDRAWAL"
+                        {% if form_data.transaction_type == 'WITHDRAWAL' %}selected{% endif %}>
+                        Withdrawal
+                    </option>
+                </select>
+
+                {% if errors.transaction_type %}
+                    <p class="field-error">{{ errors.transaction_type }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="amount">Amount (₹)</label>
+
+                <input
+                    type="number"
+                    name="amount"
+                    id="amount"
+                    placeholder="Enter amount"
+                    min="0.01"
+                    step="0.01"
+                    value="{{ form_data.amount }}"
+                    required
+                >
+
+                {% if errors.amount %}
+                    <p class="field-error">{{ errors.amount }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description (Optional)</label>
+
+                <textarea
+                    name="description"
+                    id="description"
+                    placeholder="Enter transaction description"
+                >{{ form_data.description }}</textarea>
+            </div>
+
+            <div class="form-actions">
+
+                <a href="{% url 'transaction_list' %}" class="btn-cancel">
+                    Cancel
+                </a>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-check-circle"></i>
+                    Process Transaction
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

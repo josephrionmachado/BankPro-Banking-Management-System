@@ -1,0 +1,378 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Transactions | BankPro{% endblock %}
+{% block breadcrumb %}Transactions{% endblock %}
+
+{% block extra_css %}
+<style>
+    .transaction-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .transaction-header h1 {
+        font-size: 25px;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .transaction-header p {
+        color: #8491a5;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .add-transaction-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        background: #2563eb;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 9px;
+        text-decoration: none;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+        transition: 0.2s;
+    }
+
+    .add-transaction-btn:hover {
+        background: #1d4ed8;
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .transaction-count {
+        background: white;
+        border: 1px solid #e9edf4;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 22px;
+        box-shadow: 0 4px 18px rgba(25, 45, 75, 0.045);
+    }
+
+    .transaction-count span {
+        color: #8491a5;
+        font-size: 12px;
+    }
+
+    .transaction-count h2 {
+        color: #2563eb;
+        font-size: 26px;
+        margin-top: 5px;
+    }
+
+    .transaction-toolbar {
+        margin-bottom: 18px;
+    }
+
+    .transaction-search {
+        display: flex;
+        gap: 10px;
+        max-width: 500px;
+    }
+
+    .transaction-search input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        outline: none;
+        font-family: inherit;
+        font-size: 12px;
+    }
+
+    .transaction-search input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px #eff6ff;
+    }
+
+    .transaction-search button {
+        border: none;
+        background: #2563eb;
+        color: white;
+        padding: 12px 17px;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .transaction-search button:hover {
+        background: #1d4ed8;
+    }
+
+    .transaction-table-wrapper {
+        background: white;
+        border: 1px solid #e9edf4;
+        border-radius: 13px;
+        overflow-x: auto;
+        box-shadow: 0 4px 18px rgba(25, 45, 75, 0.045);
+    }
+
+    .transaction-table {
+        width: 100%;
+        min-width: 1050px;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .transaction-table th {
+        background: #f8fafc;
+        color: #64748b;
+        padding: 16px;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .transaction-table td {
+        padding: 15px 16px;
+        border-top: 1px solid #f0f2f6;
+        color: #475569;
+        font-size: 12px;
+    }
+
+    .transaction-table tr:hover {
+        background: #f8fbff;
+    }
+
+    .transaction-id {
+        color: #2563eb;
+        font-weight: 700;
+    }
+
+    .transaction-account {
+        color: #1e293b;
+        font-weight: 700;
+    }
+
+    .transaction-customer {
+        color: #475569;
+        font-weight: 600;
+    }
+
+    .transaction-type {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .deposit {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .withdrawal {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .transfer {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .transaction-amount {
+        font-weight: 700;
+        color: #1e293b !important;
+    }
+
+    .transaction-date {
+        color: #8491a5;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+
+    .transaction-description {
+        max-width: 180px;
+        color: #8491a5 !important;
+    }
+
+    .transaction-actions {
+        display: flex;
+        align-items: center;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 11px;
+        border-radius: 7px;
+        text-decoration: none;
+        font-size: 11px;
+        font-weight: 700;
+        white-space: nowrap;
+        transition: 0.2s;
+    }
+
+    .delete-btn {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .delete-btn:hover {
+        background: #dc2626;
+        color: white;
+    }
+
+    .empty-transactions {
+        text-align: center;
+        padding: 45px 15px !important;
+        color: #8491a5 !important;
+    }
+
+    .empty-transactions i {
+        display: block;
+        font-size: 30px;
+        margin-bottom: 10px;
+        color: #cbd5e1;
+    }
+
+    @media (max-width: 600px) {
+        .transaction-header {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .add-transaction-btn {
+            justify-content: center;
+        }
+
+        .transaction-search {
+            max-width: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="transaction-header">
+    <div>
+        <h1>Transaction Management</h1>
+        <p>View and monitor all account transactions.</p>
+    </div>
+
+    <a href="{% url 'transaction_create' %}" class="add-transaction-btn">
+        <i class="fas fa-plus"></i>
+        Add New Transaction
+    </a>
+</div>
+
+<div class="transaction-count">
+    <span>Total Registered Transactions</span>
+    <h2>{{ total_transactions }}</h2>
+</div>
+
+<div class="transaction-toolbar">
+    <form method="GET" class="transaction-search">
+        <input
+            type="text"
+            name="search"
+            placeholder="Search account, customer, type or description..."
+            value="{{ search_query }}"
+        >
+
+        <button type="submit">
+            <i class="fas fa-search"></i> Search
+        </button>
+    </form>
+</div>
+
+<div class="transaction-table-wrapper">
+    <table class="transaction-table">
+
+        <thead>
+            <tr>
+                <th>Transaction ID</th>
+                <th>Account Number</th>
+                <th>Customer Name</th>
+                <th>Transaction Type</th>
+                <th>Amount</th>
+                <th>Date & Time</th>
+                <th>Description</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for transaction in transactions %}
+            <tr>
+
+                <td class="transaction-id">
+                    #{{ transaction.transaction_id }}
+                </td>
+
+                <td class="transaction-account">
+                    {{ transaction.account.account_number }}
+                </td>
+
+                <td class="transaction-customer">
+                    {{ transaction.account.customer.first_name }}
+                    {{ transaction.account.customer.last_name }}
+                </td>
+
+                <td>
+                    {% if transaction.transaction_type == 'DEPOSIT' %}
+                        <span class="transaction-type deposit">Deposit</span>
+                    {% elif transaction.transaction_type == 'WITHDRAWAL' %}
+                        <span class="transaction-type withdrawal">Withdrawal</span>
+                    {% else %}
+                        <span class="transaction-type transfer">Transfer</span>
+                    {% endif %}
+                </td>
+
+                <td class="transaction-amount">
+                    ₹ {{ transaction.amount|floatformat:2 }}
+                </td>
+
+                <td class="transaction-date">
+                    {{ transaction.transaction_date|date:"d M Y, h:i A" }}
+                </td>
+
+                <td class="transaction-description">
+                    {{ transaction.description|default:"—" }}
+                </td>
+
+                <td>
+                    <div class="transaction-actions">
+                        <a
+                            href="{% url 'transaction_delete' transaction.transaction_id %}"
+                            class="action-btn delete-btn"
+                        >
+                            <i class="fas fa-trash"></i>
+                            Delete
+                        </a>
+                    </div>
+                </td>
+
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="8" class="empty-transactions">
+                    <i class="fas fa-receipt"></i>
+                    <strong>No transactions found</strong>
+                    <p>Transactions will appear here when available.</p>
+                </td>
+            </tr>
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+</div>
+
+{% endblock %}

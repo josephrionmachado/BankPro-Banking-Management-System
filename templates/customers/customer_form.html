@@ -1,0 +1,208 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if is_edit %}Edit Customer{% else %}Add Customer{% endif %} | BankPro
+{% endblock %}
+
+{% block breadcrumb %}
+    {% if is_edit %}Edit Customer{% else %}Add Customer{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-header { margin-bottom: 25px; }
+    .form-header h1 { font-size: 25px; font-weight: 800; color: #1e293b; }
+    .form-header p { color: #8491a5; font-size: 13px; margin-top: 6px; }
+
+    .customer-form-card {
+        max-width: 850px;
+        background: white;
+        border: 1px solid #e9edf4;
+        border-radius: 14px;
+        padding: 28px;
+        box-shadow: 0 4px 18px rgba(25,45,75,.045);
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+
+    .form-group { margin-bottom: 20px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    .form-group label {
+        display: block;
+        color: #475569;
+        font-size: 12px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .form-group input,
+    .form-group textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        font: inherit;
+        font-size: 13px;
+        outline: none;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px #eff6ff;
+    }
+
+    .form-group textarea { min-height: 100px; resize: vertical; }
+
+    .form-actions {
+        display: flex;
+        gap: 12px;
+        margin-top: 10px;
+    }
+
+    .save-btn, .cancel-btn {
+        padding: 12px 20px;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .save-btn { background: #2563eb; color: white; border: none; }
+    .save-btn:hover { background: #1d4ed8; }
+
+    .cancel-btn { background: #f1f5f9; color: #475569; }
+    .cancel-btn:hover { background: #e2e8f0; }
+
+    .error-message {
+        color: #dc2626;
+        font-size: 12px;
+        margin-top: 6px;
+    }
+
+    @media (max-width: 600px) {
+        .form-grid { grid-template-columns: 1fr; }
+        .form-group.full { grid-column: auto; }
+        .customer-form-card { padding: 18px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="form-header">
+    {% if is_edit %}
+        <h1>Edit Customer</h1>
+        <p>Update the existing customer's information.</p>
+    {% else %}
+        <h1>Add New Customer</h1>
+        <p>Enter the details to register a new bank customer.</p>
+    {% endif %}
+</div>
+
+<div class="customer-form-card">
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-grid">
+
+            <div class="form-group">
+                <label for="first_name">First Name</label>
+                <input
+                    type="text"
+                    id="first_name"
+                    name="first_name"
+                    value="{{ form_data.first_name|default:'' }}"
+                    required
+                >
+                {% if errors.first_name %}
+                    <p class="error-message">{{ errors.first_name }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="last_name">Last Name</label>
+                <input
+                    type="text"
+                    id="last_name"
+                    name="last_name"
+                    value="{{ form_data.last_name|default:'' }}"
+                    required
+                >
+                {% if errors.last_name %}
+                    <p class="error-message">{{ errors.last_name }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="{{ form_data.email|default:'' }}"
+                    required
+                >
+                {% if errors.email %}
+                    <p class="error-message">{{ errors.email }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value="{{ form_data.phone|default:'' }}"
+                    required
+                >
+                {% if errors.phone %}
+                    <p class="error-message">{{ errors.phone }}</p>
+                {% endif %}
+            </div>
+
+            <div class="form-group full">
+                <label for="address">Address</label>
+                <textarea
+                    id="address"
+                    name="address"
+                    required
+                >{{ form_data.address|default:'' }}</textarea>
+                {% if errors.address %}
+                    <p class="error-message">{{ errors.address }}</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+        <div class="form-actions">
+
+            <button type="submit" class="save-btn">
+                {% if is_edit %}
+                    <i class="fas fa-save"></i> Update Customer
+                {% else %}
+                    <i class="fas fa-user-plus"></i> Save Customer
+                {% endif %}
+            </button>
+
+            <a href="{% url 'customer_list' %}" class="cancel-btn">
+                Cancel
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

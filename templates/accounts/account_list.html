@@ -1,0 +1,368 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Accounts | BankPro{% endblock %}
+{% block breadcrumb %}Accounts{% endblock %}
+
+{% block extra_css %}
+<style>
+    .account-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .account-header h1 {
+        font-size: 25px;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .account-header p {
+        color: #8491a5;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .add-account-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        background: #2563eb;
+        color: white;
+        text-decoration: none;
+        padding: 12px 18px;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 700;
+        white-space: nowrap;
+        transition: 0.2s;
+    }
+
+    .add-account-btn:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+    }
+
+    .account-count {
+        background: white;
+        border: 1px solid #e9edf4;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 22px;
+        box-shadow: 0 4px 18px rgba(25, 45, 75, 0.045);
+    }
+
+    .account-count span {
+        color: #8491a5;
+        font-size: 12px;
+    }
+
+    .account-count h2 {
+        color: #2563eb;
+        font-size: 26px;
+        margin-top: 5px;
+    }
+
+    .account-toolbar {
+        margin-bottom: 18px;
+    }
+
+    .account-search {
+        display: flex;
+        gap: 10px;
+        max-width: 500px;
+    }
+
+    .account-search input {
+        width: 100%;
+        padding: 12px 15px;
+        border: 1px solid #e2e8f0;
+        border-radius: 9px;
+        outline: none;
+        font-family: inherit;
+        font-size: 12px;
+    }
+
+    .account-search input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px #eff6ff;
+    }
+
+    .account-search button {
+        border: none;
+        background: #2563eb;
+        color: white;
+        padding: 12px 17px;
+        border-radius: 9px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .account-search button:hover {
+        background: #1d4ed8;
+    }
+
+    .account-table-wrapper {
+        background: white;
+        border: 1px solid #e9edf4;
+        border-radius: 13px;
+        overflow-x: auto;
+        box-shadow: 0 4px 18px rgba(25, 45, 75, 0.045);
+    }
+
+    .account-table {
+        width: 100%;
+        min-width: 950px;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .account-table th {
+        background: #f8fafc;
+        color: #64748b;
+        padding: 16px;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .account-table td {
+        padding: 15px 16px;
+        border-top: 1px solid #f0f2f6;
+        color: #475569;
+        font-size: 12px;
+    }
+
+    .account-table tr:hover {
+        background: #f8fbff;
+    }
+
+    .account-number {
+        color: #2563eb;
+        font-weight: 700;
+    }
+
+    .account-holder {
+        color: #1e293b;
+        font-weight: 700;
+    }
+
+    .account-type {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .savings {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .current {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .account-balance {
+        font-weight: 700;
+        color: #1e293b !important;
+    }
+
+    .account-date {
+        color: #8491a5;
+        font-size: 11px;
+    }
+
+    .account-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+        transition: 0.2s;
+    }
+
+    .edit-btn {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .edit-btn:hover {
+        background: #dbeafe;
+    }
+
+    .delete-btn {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .delete-btn:hover {
+        background: #fee2e2;
+    }
+
+    .empty-accounts {
+        text-align: center;
+        padding: 45px 15px !important;
+        color: #8491a5 !important;
+    }
+
+    .empty-accounts i {
+        display: block;
+        font-size: 30px;
+        margin-bottom: 10px;
+        color: #cbd5e1;
+    }
+
+    @media (max-width: 600px) {
+        .account-header {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .add-account-btn {
+            justify-content: center;
+        }
+
+        .account-search {
+            max-width: none;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="account-header">
+    <div>
+        <h1>Account Management</h1>
+        <p>Manage and monitor all registered bank accounts.</p>
+    </div>
+
+    <a href="{% url 'account_create' %}" class="add-account-btn">
+        <i class="fas fa-plus"></i>
+        Add New Account
+    </a>
+</div>
+
+<div class="account-count">
+    <span>Total Registered Accounts</span>
+    <h2>{{ total_accounts }}</h2>
+</div>
+
+<div class="account-toolbar">
+    <form method="GET" class="account-search">
+        <input
+            type="text"
+            name="search"
+            placeholder="Search account number or customer..."
+            value="{{ search_query }}"
+        >
+
+        <button type="submit">
+            <i class="fas fa-search"></i> Search
+        </button>
+    </form>
+</div>
+
+<div class="account-table-wrapper">
+    <table class="account-table">
+
+        <thead>
+            <tr>
+                <th>Account ID</th>
+                <th>Account Number</th>
+                <th>Customer Name</th>
+                <th>Account Type</th>
+                <th>Balance</th>
+                <th>Opening Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for account in accounts %}
+            <tr>
+                <td>#{{ account.account_id }}</td>
+
+                <td class="account-number">
+                    {{ account.account_number }}
+                </td>
+
+                <td class="account-holder">
+                    {{ account.customer.first_name }}
+                    {{ account.customer.last_name }}
+                </td>
+
+                <td>
+                    {% if account.account_type == 'SAVINGS' %}
+                        <span class="account-type savings">Savings</span>
+                    {% else %}
+                        <span class="account-type current">Current</span>
+                    {% endif %}
+                </td>
+
+                <td class="account-balance">
+                    ₹ {{ account.balance|floatformat:2 }}
+                </td>
+
+                <td class="account-date">
+                    {{ account.created_at|date:"d M Y" }}
+                </td>
+
+                <td>
+                    <div class="account-actions">
+
+                        <a
+                            href="{% url 'account_edit' account.account_id %}"
+                            class="action-btn edit-btn"
+                        >
+                            <i class="fas fa-edit"></i>
+                            Edit
+                        </a>
+
+                        <a
+                            href="{% url 'account_delete' account.account_id %}"
+                            class="action-btn delete-btn"
+                        >
+                            <i class="fas fa-trash"></i>
+                            Delete
+                        </a>
+
+                    </div>
+                </td>
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="7" class="empty-accounts">
+                    <i class="fas fa-wallet"></i>
+                    <strong>No accounts found</strong>
+                    <p>Try another search or add an account.</p>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+
+    </table>
+</div>
+
+{% endblock %}

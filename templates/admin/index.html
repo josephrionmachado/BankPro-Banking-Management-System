@@ -1,0 +1,183 @@
+
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block title %}BankPro Administration{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/dashboard.css' %}">
+
+<style>
+    #content-main {
+        width: 100%;
+    }
+
+    #content-main .module {
+        background: #ffffff;
+        border: 1px solid #e9edf4;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 18px rgba(25,45,75,.045);
+        margin-bottom: 25px;
+    }
+
+    #content-main .module caption,
+    #content-main .module h2 {
+        background: #f8fafc !important;
+        color: #1e293b !important;
+        padding: 15px 18px;
+        border-bottom: 1px solid #e9edf4;
+        font-weight: 700;
+    }
+
+    #content-main .module th,
+    #content-main .module td {
+        padding: 13px 16px;
+    }
+
+    #content-main .module tr:nth-child(even) {
+        background: #f8fafc;
+    }
+
+    #content-main .module a {
+        color: #2563eb;
+        font-weight: 600;
+    }
+
+    #content-related {
+        background: #ffffff;
+        border: 1px solid #e9edf4;
+        border-radius: 12px;
+        padding: 18px;
+        box-shadow: 0 4px 18px rgba(25,45,75,.045);
+    }
+
+    #content-related h2 {
+        color: #1e293b;
+        font-size: 15px;
+        margin-bottom: 12px;
+    }
+
+    #content-related h3 {
+        color: #64748b;
+        font-size: 12px;
+    }
+
+    #content-related ul {
+        padding-left: 18px;
+    }
+
+    #content-related li {
+        margin-bottom: 12px;
+        color: #64748b;
+    }
+
+    #content-related a {
+        color: #2563eb;
+    }
+</style>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}{{ block.super }} dashboard{% endblock %}
+
+{% block nav-breadcrumbs %}{% endblock %}
+
+{% block nav-sidebar %}
+<nav id="nav-sidebar">
+
+    <p class="bankpro-menu-label">OVERVIEW</p>
+
+    <a href="{% url 'dashboard' %}" class="bankpro-nav-link">
+        <i class="fas fa-chart-pie"></i>
+        <span>Dashboard</span>
+    </a>
+
+    <p class="bankpro-menu-label">MANAGEMENT</p>
+
+    <a href="{% url 'customer_list' %}" class="bankpro-nav-link">
+        <i class="fas fa-users"></i>
+        <span>Customers</span>
+    </a>
+
+    <a href="{% url 'account_list' %}" class="bankpro-nav-link">
+        <i class="fas fa-wallet"></i>
+        <span>Accounts</span>
+    </a>
+
+    <a href="{% url 'transaction_list' %}" class="bankpro-nav-link">
+        <i class="fas fa-arrow-right-arrow-left"></i>
+        <span>Transactions</span>
+    </a>
+
+    <p class="bankpro-menu-label">SYSTEM</p>
+
+    <a href="{% url 'admin:index' %}" class="bankpro-nav-link active">
+        <i class="fas fa-user-shield"></i>
+        <span>Admin Panel</span>
+    </a>
+
+</nav>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    {% include "admin/app_list.html" with app_list=app_list show_changelinks=True %}
+</div>
+{% endblock %}
+
+{% block sidebar %}
+<div id="content-related">
+    <div class="module" id="recent-actions-module">
+        <h2>{% translate 'Recent actions' %}</h2>
+        <h3>{% translate 'My actions' %}</h3>
+
+        {% load log %}
+        {% get_admin_log 10 as admin_log for_user user %}
+
+        {% if not admin_log %}
+            <p>{% translate 'None available' %}</p>
+        {% else %}
+            <ul class="actionlist">
+                {% for entry in admin_log %}
+                    <li class="{% if entry.is_addition %}addlink{% endif %}{% if entry.is_change %}changelink{% endif %}{% if entry.is_deletion %}deletelink{% endif %}">
+                        <span class="visually-hidden">
+                            {% if entry.is_addition %}
+                                {% translate 'Added:' %}
+                            {% elif entry.is_change %}
+                                {% translate 'Changed:' %}
+                            {% elif entry.is_deletion %}
+                                {% translate 'Deleted:' %}
+                            {% endif %}
+                        </span>
+
+                        {% if entry.is_deletion or not entry.get_admin_url %}
+                            {{ entry.object_repr }}
+                        {% else %}
+                            <a href="{{ entry.get_admin_url }}">
+                                {{ entry.object_repr }}
+                            </a>
+                        {% endif %}
+
+                        <br>
+
+                        {% if entry.content_type %}
+                            <span class="mini quiet">
+                                {% filter capfirst %}
+                                    {{ entry.content_type.name }}
+                                {% endfilter %}
+                            </span>
+                        {% else %}
+                            <span class="mini quiet">
+                                {% translate 'Unknown content' %}
+                            </span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

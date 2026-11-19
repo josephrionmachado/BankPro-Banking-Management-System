@@ -1,0 +1,561 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Reports | BankPro{% endblock %}
+{% block breadcrumb %}Reports{% endblock %}
+
+{% block extra_css %}
+<style>
+    .reports-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+    }
+
+    .reports-header h1 {
+        font-size: 25px;
+        font-weight: 800;
+        color: #1e293b;
+    }
+
+    .reports-header p {
+        color: #8491a5;
+        font-size: 12px;
+        margin-top: 5px;
+    }
+
+    .report-cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 18px;
+        margin-bottom: 25px;
+    }
+
+    .report-card {
+        background: white;
+        border: 1px solid #e9edf4;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 4px 18px rgba(25, 45, 75, 0.045);
+    }
+
+    .report-card span {
+        color: #8491a5;
+        font-size: 11px;
+        font-weight: 600;
+    }
+
+    .report-card h2 {
+        color: #1e293b;
+        font-size: 23px;
+        margin-top: 10px;
+        font-weight: 800;
+        overflow-wrap: anywhere;
+    }
+
+    .report-card.deposit h2 {
+        color: #059669;
+    }
+
+    .report-card.withdrawal h2 {
+        color: #dc2626;
+    }
+
+    .report-card.transfer h2 {
+        color: #2563eb;
+    }
+
+    .report-filter {
+        background: white;
+        border: 1px solid #e9edf4;
+        border-radius: 12px;
+        padding: 22px;
+        margin-bottom: 22px;
+        box-shadow: 0 4px 18px rgba(25, 45, 75, 0.045);
+    }
+
+    .filter-heading {
+        font-size: 15px;
+        font-weight: 800;
+        color: #1e293b;
+        margin-bottom: 18px;
+    }
+
+    .filter-fields {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 15px;
+        align-items: end;
+    }
+
+    .filter-group label {
+        display: block;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .filter-group input,
+    .filter-group select {
+        width: 100%;
+        padding: 11px 12px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        outline: none;
+        font-family: inherit;
+        font-size: 12px;
+        color: #475569;
+        background: white;
+    }
+
+    .filter-group input:focus,
+    .filter-group select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px #eff6ff;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 18px;
+        flex-wrap: wrap;
+    }
+
+    .report-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px 17px;
+        border: none;
+        border-radius: 8px;
+        font-size: 11px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .filter-btn {
+        background: #2563eb;
+        color: white;
+    }
+
+    .filter-btn:hover {
+        background: #1d4ed8;
+    }
+
+    .export-btn {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .export-btn:hover {
+        background: #059669;
+        color: white;
+    }
+
+    .reset-btn {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .reset-btn:hover {
+        background: #e2e8f0;
+    }
+
+    .report-error {
+        color: #dc2626;
+        font-size: 11px;
+        margin-top: 7px;
+    }
+
+    .report-table-wrapper {
+        background: white;
+        border: 1px solid #e9edf4;
+        border-radius: 13px;
+        overflow-x: auto;
+        box-shadow: 0 4px 18px rgba(25, 45, 75, 0.045);
+    }
+
+    .report-table-heading {
+        padding: 20px;
+        border-bottom: 1px solid #f0f2f6;
+    }
+
+    .report-table-heading h2 {
+        color: #1e293b;
+        font-size: 16px;
+        font-weight: 800;
+    }
+
+    .report-table-heading p {
+        color: #8491a5;
+        font-size: 11px;
+        margin-top: 5px;
+    }
+
+    .report-table {
+        width: 100%;
+        min-width: 900px;
+        border-collapse: collapse;
+        text-align: left;
+    }
+
+    .report-table th {
+        background: #f8fafc;
+        color: #64748b;
+        padding: 15px;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .report-table td {
+        padding: 14px 15px;
+        border-top: 1px solid #f0f2f6;
+        color: #475569;
+        font-size: 12px;
+    }
+
+    .report-table tr:hover {
+        background: #f8fbff;
+    }
+
+    .report-id {
+        color: #2563eb !important;
+        font-weight: 700;
+    }
+
+    .report-account {
+        color: #1e293b !important;
+        font-weight: 700;
+    }
+
+    .report-type {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 20px;
+        font-size: 10px;
+        font-weight: 700;
+    }
+
+    .report-deposit {
+        background: #ecfdf5;
+        color: #059669;
+    }
+
+    .report-withdrawal {
+        background: #fef2f2;
+        color: #dc2626;
+    }
+
+    .report-transfer {
+        background: #eff6ff;
+        color: #2563eb;
+    }
+
+    .report-amount {
+        color: #1e293b !important;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .report-date {
+        color: #8491a5 !important;
+        white-space: nowrap;
+        font-size: 11px !important;
+    }
+
+    .report-empty {
+        text-align: center;
+        padding: 45px 15px !important;
+        color: #8491a5 !important;
+    }
+
+    .report-empty i {
+        display: block;
+        font-size: 30px;
+        color: #cbd5e1;
+        margin-bottom: 10px;
+    }
+
+    @media (max-width: 1000px) {
+        .report-cards {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 650px) {
+        .reports-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .filter-fields {
+            grid-template-columns: 1fr;
+        }
+
+        .report-cards {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-actions {
+            flex-direction: column;
+        }
+
+        .report-btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+
+<div class="reports-header">
+    <div>
+        <h1>Financial Reports</h1>
+        <p>Monitor deposits, withdrawals and account transactions.</p>
+    </div>
+</div>
+
+
+<!-- SUMMARY CARDS -->
+
+<div class="report-cards">
+
+    <div class="report-card">
+        <span>Total Transactions</span>
+        <h2>{{ total_transactions }}</h2>
+    </div>
+
+    <div class="report-card">
+        <span>Total Transaction Amount</span>
+        <h2>₹ {{ total_amount|floatformat:2 }}</h2>
+    </div>
+
+    <div class="report-card deposit">
+        <span>Total Deposits</span>
+        <h2>₹ {{ deposit_total|floatformat:2 }}</h2>
+    </div>
+
+    <div class="report-card withdrawal">
+        <span>Total Withdrawals</span>
+        <h2>₹ {{ withdrawal_total|floatformat:2 }}</h2>
+    </div>
+
+    <div class="report-card transfer">
+        <span>Total Transfers</span>
+        <h2>₹ {{ transfer_total|floatformat:2 }}</h2>
+    </div>
+
+</div>
+
+
+<!-- FILTER SECTION -->
+
+<div class="report-filter">
+
+    <h2 class="filter-heading">
+        <i class="fas fa-filter"></i>
+        Filter Reports
+    </h2>
+
+    <form method="GET">
+
+        <div class="filter-fields">
+
+            <div class="filter-group">
+                <label for="start_date">Start Date</label>
+                <input
+                    type="date"
+                    id="start_date"
+                    name="start_date"
+                    value="{{ start_date }}"
+                >
+
+                {% if errors.start_date %}
+                    <p class="report-error">{{ errors.start_date }}</p>
+                {% endif %}
+            </div>
+
+            <div class="filter-group">
+                <label for="end_date">End Date</label>
+                <input
+                    type="date"
+                    id="end_date"
+                    name="end_date"
+                    value="{{ end_date }}"
+                >
+
+                {% if errors.end_date %}
+                    <p class="report-error">{{ errors.end_date }}</p>
+                {% endif %}
+            </div>
+
+            <div class="filter-group">
+                <label for="transaction_type">Transaction Type</label>
+
+                <select id="transaction_type" name="transaction_type">
+                    <option value="">All Transactions</option>
+
+                    <option value="DEPOSIT"
+                        {% if selected_type == 'DEPOSIT' %}selected{% endif %}>
+                        Deposit
+                    </option>
+
+                    <option value="WITHDRAWAL"
+                        {% if selected_type == 'WITHDRAWAL' %}selected{% endif %}>
+                        Withdrawal
+                    </option>
+
+                    <option value="TRANSFER"
+                        {% if selected_type == 'TRANSFER' %}selected{% endif %}>
+                        Transfer
+                    </option>
+                </select>
+
+                {% if errors.transaction_type %}
+                    <p class="report-error">{{ errors.transaction_type }}</p>
+                {% endif %}
+            </div>
+
+        </div>
+
+        {% if errors.date_range %}
+            <p class="report-error">{{ errors.date_range }}</p>
+        {% endif %}
+
+        <div class="filter-actions">
+
+            <button type="submit" class="report-btn filter-btn">
+                <i class="fas fa-search"></i>
+                Apply Filters
+            </button>
+
+            <a href="{% url 'reports' %}" class="report-btn reset-btn">
+                <i class="fas fa-rotate-left"></i>
+                Reset
+            </a>
+
+        </div>
+
+    </form>
+
+    <!-- CSV EXPORT -->
+
+    <form method="GET" class="filter-actions">
+
+        <input type="hidden" name="start_date" value="{{ start_date }}">
+        <input type="hidden" name="end_date" value="{{ end_date }}">
+        <input type="hidden" name="transaction_type" value="{{ selected_type }}">
+        <input type="hidden" name="export" value="csv">
+
+        <button type="submit" class="report-btn export-btn">
+            <i class="fas fa-file-csv"></i>
+            Export CSV
+        </button>
+
+    </form>
+
+</div>
+
+
+<!-- TRANSACTION REPORT TABLE -->
+
+<div class="report-table-wrapper">
+
+    <div class="report-table-heading">
+        <h2>Transaction History</h2>
+        <p>
+            Showing {{ total_transactions }} transaction{{ total_transactions|pluralize }}
+        </p>
+    </div>
+
+    <table class="report-table">
+
+        <thead>
+            <tr>
+                <th>Transaction ID</th>
+                <th>Account Number</th>
+                <th>Customer</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Date & Time</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for item in transactions %}
+
+            <tr>
+
+                <td class="report-id">
+                    #{{ item.transaction_id }}
+                </td>
+
+                <td class="report-account">
+                    {{ item.account.account_number }}
+                </td>
+
+                <td>
+                    {{ item.account.customer.first_name }}
+                    {{ item.account.customer.last_name }}
+                </td>
+
+                <td>
+                    {% if item.transaction_type == 'DEPOSIT' %}
+                        <span class="report-type report-deposit">
+                            Deposit
+                        </span>
+                    {% elif item.transaction_type == 'WITHDRAWAL' %}
+                        <span class="report-type report-withdrawal">
+                            Withdrawal
+                        </span>
+                    {% else %}
+                        <span class="report-type report-transfer">
+                            Transfer
+                        </span>
+                    {% endif %}
+                </td>
+
+                <td class="report-amount">
+                    ₹ {{ item.amount|floatformat:2 }}
+                </td>
+
+                <td class="report-date">
+                    {{ item.transaction_date|date:"d M Y, h:i A" }}
+                </td>
+
+                <td>
+                    {{ item.description|default:"—" }}
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="7" class="report-empty">
+                    <i class="fas fa-file-circle-xmark"></i>
+                    <strong>No transactions found</strong>
+                    <p>Try changing your filters to see more results.</p>
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

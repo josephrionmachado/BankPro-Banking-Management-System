@@ -1,0 +1,465 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | BankPro{% endblock %}
+
+{% block content %}
+
+<!-- Welcome Header -->
+<div class="page-header">
+    <div>
+        <h1>Dashboard Overview</h1>
+        <p>Welcome back, Administrator! Here's what's happening with your bank today.</p>
+    </div>
+
+    <div class="header-date">
+        <i class="far fa-calendar-alt"></i>
+        <span id="dashboardDate"></span>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <div class="stat-icon customers-icon">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="stat-info">
+            <p>Total Customers</p>
+            <h2>{{ total_customers }}</h2>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon accounts-icon">
+            <i class="fas fa-wallet"></i>
+        </div>
+        <div class="stat-info">
+            <p>Total Accounts</p>
+            <h2>{{ total_accounts }}</h2>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon balance-icon">
+            <i class="fas fa-indian-rupee-sign"></i>
+        </div>
+        <div class="stat-info">
+            <p>Total Account Balance</p>
+            <h2>₹{{ total_balance|default:"0.00" }}</h2>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon transactions-icon">
+            <i class="fas fa-arrow-right-arrow-left"></i>
+        </div>
+        <div class="stat-info">
+            <p>Total Transactions</p>
+            <h2>{{ total_transactions }}</h2>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- =====================================
+     DASHBOARD CHARTS
+===================================== -->
+
+<div class="section-header charts-section-header">
+    <div>
+        <h2>Banking Analytics</h2>
+        <p>Visual overview of your bank's financial activity</p>
+    </div>
+</div>
+
+<div class="charts-grid">
+
+    <!-- Deposit vs Withdrawal Chart -->
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <div>
+                <h3>Deposits vs Withdrawals</h3>
+                <p>Total transaction amounts</p>
+            </div>
+
+            <span class="chart-icon blue-chart-icon">
+                <i class="fas fa-money-bill-transfer"></i>
+            </span>
+        </div>
+
+        <div class="chart-wrapper">
+            <canvas id="transactionChart"></canvas>
+        </div>
+    </div>
+
+
+    <!-- Account Types Chart -->
+    <div class="chart-card">
+        <div class="chart-card-header">
+            <div>
+                <h3>Account Distribution</h3>
+                <p>Accounts by type</p>
+            </div>
+
+            <span class="chart-icon green-chart-icon">
+                <i class="fas fa-wallet"></i>
+            </span>
+        </div>
+
+        <div class="chart-wrapper doughnut-wrapper">
+            <canvas id="accountChart"></canvas>
+        </div>
+    </div>
+
+
+    <!-- Monthly Transactions Chart -->
+    <div class="chart-card monthly-chart-card">
+        <div class="chart-card-header">
+            <div>
+                <h3>Monthly Transactions</h3>
+                <p>Transaction activity over the last six months</p>
+            </div>
+
+            <span class="chart-icon purple-chart-icon">
+                <i class="fas fa-chart-line"></i>
+            </span>
+        </div>
+
+        <div class="chart-wrapper monthly-chart-wrapper">
+            <canvas id="monthlyChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- =====================================
+     QUICK ACTIONS
+===================================== -->
+
+<div class="section-header">
+    <h2>Quick Actions</h2>
+    <p>Quick access to your banking operations</p>
+</div>
+
+<div class="quick-actions">
+
+    <a href="{% url 'customer_create' %}" class="action-card">
+        <i class="fas fa-user-plus"></i>
+        <span>Add New Customer</span>
+    </a>
+
+    <a href="{% url 'account_create' %}" class="action-card">
+        <i class="fas fa-wallet"></i>
+        <span>Create New Account</span>
+    </a>
+
+    <a href="{% url 'transaction_list' %}" class="action-card">
+        <i class="fas fa-clock-rotate-left"></i>
+        <span>View Transactions</span>
+    </a>
+
+</div>
+
+
+<!-- =====================================
+     RECENT TRANSACTIONS
+===================================== -->
+
+<div class="section-header recent-header">
+
+    <div>
+        <h2>Recent Transactions</h2>
+        <p>Latest activity from your banking system</p>
+    </div>
+
+    <a href="{% url 'transaction_list' %}" class="view-all">
+        View All <i class="fas fa-arrow-right"></i>
+    </a>
+
+</div>
+
+<div class="table-container">
+
+    <table class="transactions-table">
+
+        <thead>
+            <tr>
+                <th>Transaction ID</th>
+                <th>Account Number</th>
+                <th>Transaction Type</th>
+                <th>Amount</th>
+                <th>Date & Time</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for transaction in recent_transactions %}
+
+            <tr>
+                <td>#{{ transaction.transaction_id }}</td>
+
+                <td>{{ transaction.account.account_number }}</td>
+
+                <td>
+                    <span class="transaction-type {{ transaction.transaction_type|lower }}">
+                        {{ transaction.get_transaction_type_display }}
+                    </span>
+                </td>
+
+                <td>₹{{ transaction.amount|floatformat:2 }}</td>
+
+                <td>
+                    {{ transaction.transaction_date|date:"d M Y, h:i A" }}
+                </td>
+            </tr>
+
+            {% empty %}
+
+            <tr>
+                <td colspan="5" class="empty-message">
+                    <i class="fas fa-inbox"></i>
+                    <p>No transactions available yet.</p>
+                </td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Dashboard Chart Data -->
+{{ deposit_total|json_script:"deposit-data" }}
+{{ withdrawal_total|json_script:"withdrawal-data" }}
+{{ account_type_labels|json_script:"account-labels" }}
+{{ account_type_counts|json_script:"account-counts" }}
+{{ monthly_labels|json_script:"monthly-labels" }}
+{{ monthly_counts|json_script:"monthly-counts" }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    // Read chart data from Django
+    const depositTotal = JSON.parse(
+        document.getElementById('deposit-data').textContent
+    );
+
+    const withdrawalTotal = JSON.parse(
+        document.getElementById('withdrawal-data').textContent
+    );
+
+    const accountLabels = JSON.parse(
+        document.getElementById('account-labels').textContent
+    );
+
+    const accountCounts = JSON.parse(
+        document.getElementById('account-counts').textContent
+    );
+
+    const monthlyLabels = JSON.parse(
+        document.getElementById('monthly-labels').textContent
+    );
+
+    const monthlyCounts = JSON.parse(
+        document.getElementById('monthly-counts').textContent
+    );
+
+
+    // Common chart settings
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#8491a5';
+
+
+    // Chart 1: Deposits vs Withdrawals
+    const transactionCanvas = document.getElementById('transactionChart');
+
+    if (transactionCanvas) {
+        new Chart(transactionCanvas, {
+            type: 'bar',
+
+            data: {
+                labels: ['Deposits', 'Withdrawals'],
+
+                datasets: [{
+                    label: 'Amount (₹)',
+                    data: [depositTotal, withdrawalTotal],
+
+                    backgroundColor: [
+                        'rgba(22, 163, 106, 0.8)',
+                        'rgba(228, 91, 91, 0.8)'
+                    ],
+
+                    borderRadius: 8,
+                    maxBarThickness: 85
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return '₹' + context.parsed.y.toLocaleString('en-IN', {
+                                    maximumFractionDigits: 2
+                                });
+                            }
+                        }
+                    }
+                },
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+
+                        ticks: {
+                            callback: function(value) {
+                                return '₹' + value.toLocaleString('en-IN');
+                            }
+                        },
+
+                        grid: {
+                            color: '#f0f2f6'
+                        }
+                    },
+
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+    // Chart 2: Account Distribution
+    const accountCanvas = document.getElementById('accountChart');
+
+    if (accountCanvas) {
+        new Chart(accountCanvas, {
+            type: 'doughnut',
+
+            data: {
+                labels: accountLabels,
+
+                datasets: [{
+                    data: accountCounts,
+
+                    backgroundColor: [
+                        '#2563eb',
+                        '#16a36a',
+                        '#f59e0b',
+                        '#8b5cf6'
+                    ],
+
+                    borderWidth: 0,
+                    hoverOffset: 8
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                cutout: '68%',
+
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+
+                        labels: {
+                            usePointStyle: true,
+                            padding: 20
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+
+    // Chart 3: Monthly Transactions
+    const monthlyCanvas = document.getElementById('monthlyChart');
+
+    if (monthlyCanvas) {
+        new Chart(monthlyCanvas, {
+            type: 'line',
+
+            data: {
+                labels: monthlyLabels,
+
+                datasets: [{
+                    label: 'Transactions',
+                    data: monthlyCounts,
+
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.10)',
+
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+
+                    pointBackgroundColor: '#2563eb',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+
+                scales: {
+                    y: {
+                        beginAtZero: true,
+
+                        ticks: {
+                            precision: 0
+                        },
+
+                        grid: {
+                            color: '#f0f2f6'
+                        }
+                    },
+
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+});
+</script>
+
+{% endblock %}
